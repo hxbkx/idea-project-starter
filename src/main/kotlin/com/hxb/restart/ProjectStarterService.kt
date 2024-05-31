@@ -12,8 +12,9 @@ import com.intellij.openapi.components.ProjectComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.wm.ToolWindowId
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import java.net.DatagramPacket
+import java.net.InetAddress
+import java.net.MulticastSocket
 import java.net.ServerSocket
 import java.util.function.Consumer
 
@@ -29,20 +30,24 @@ class ProjectStarterService : ProjectComponent {
         Thread {
 
             logger.info("ProjectStarterService Plugin is running 1.")
-            serverSocket = ServerSocket(43211)
+            val multicastGroupAddress = "230.0.0.0"
+            val multicastPort = 43211
+            val group = InetAddress.getByName(multicastGroupAddress)
+            val multicastSocket = MulticastSocket(multicastPort)
+            multicastSocket.joinGroup(group)
             while (true) {
                 try {
                     logger.info("ProjectStarterService Plugin is running 2.")
-                    val socket = serverSocket!!.accept()
+                    val buffer = ByteArray(1000)
+                    val packet = DatagramPacket(buffer, buffer.size)
+                    multicastSocket.receive(packet)
                     logger.info("ProjectStarterService Plugin is running 3.")
-                    val `in` = BufferedReader(InputStreamReader(socket.getInputStream()))
-                    val message = `in`.readLine()
-                    if ("restart" == message) {
-                        // 重启 Spring Boot 项目
-                        ApplicationManager.getApplication().invokeLater {
-                            restartSpringBootProject()
-                        }
+                    val message = String(packet.data, 0, packet.length).trim()
+                    println("Received message: $message")
+                    ApplicationManager.getApplication().invokeLater {
+                        restartSpringBootProject(message)
                     }
+
 
                 } catch (e: Exception) {
                     logger.error("ProjectStarterService Plugin is error 4.", e)
@@ -63,12 +68,17 @@ class ProjectStarterService : ProjectComponent {
     }
 
     @Throws(ExecutionException::class)
-    private fun restartSpringBootProject() {
+    private fun restartSpringBootProject(message: String) {
         val openProjects = ProjectManager.getInstance().openProjects
         logger.info("ProjectStarterService Plugin is running size.," + openProjects.size)
         if (openProjects.isNotEmpty()) {
             currentProject = openProjects[0]  // 获取第一个打开的项目
             logger.info("ProjectStarterService Plugin is running name.," + currentProject!!.name)
+        }
+        var appName = currentProject!!.name
+        if ("restart $appName" != message) {
+            // 重启 Spring Boot 项目
+            return
         }
         val runManager = RunManager.getInstance(currentProject!!)
         val configuration = runManager.selectedConfiguration
