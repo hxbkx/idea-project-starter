@@ -8,6 +8,7 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
 import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.ApplicationComponent
 import com.intellij.openapi.components.ProjectComponent
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
@@ -19,9 +20,8 @@ import java.net.ServerSocket
 import java.util.function.Consumer
 
 
-class ProjectStarterService : ProjectComponent {
+class ProjectStarterService : ApplicationComponent {
     private var serverSocket: ServerSocket? = null
-    private var currentProject: Project? = null
     val logger = com.intellij.openapi.diagnostic.Logger.getInstance(ProjectStarterService::class.java)
 
     override fun initComponent() {
@@ -69,18 +69,18 @@ class ProjectStarterService : ProjectComponent {
 
     @Throws(ExecutionException::class)
     private fun restartSpringBootProject(message: String) {
-        val openProjects = ProjectManager.getInstance().openProjects
-        logger.info("ProjectStarterService Plugin is running size.," + openProjects.size)
-        if (openProjects.isNotEmpty()) {
-            currentProject = openProjects[0]  // 获取第一个打开的项目
-            logger.info("ProjectStarterService Plugin is running name.," + currentProject!!.name)
+        val projectName = message.split(" ")[1].trim()
+        val command = message.split(" ")[0].trim()
+        val openProjects = ProjectManager.getInstance().openProjects.filter { it.name == projectName }.firstOrNull()
+        if (openProjects == null) {
+            logger.warn("ProjectStarterService Plugin not find project return" + projectName)
+            return;
         }
-        var appName = currentProject!!.name
-        if ("restart $appName" != message) {
-            // 重启 Spring Boot 项目
+        var appName = openProjects.name
+        if ("restart" != command.trim()) {
             return
         }
-        val runManager = RunManager.getInstance(currentProject!!)
+        val runManager = RunManager.getInstance(openProjects)
         val configuration = runManager.selectedConfiguration
         if (configuration != null) {
             logger.info("ProjectStarterService Plugin is running cf name.," + configuration!!.name)
@@ -90,7 +90,7 @@ class ProjectStarterService : ProjectComponent {
             if (runner != null) {
                 // Stop the current running configuration
                 // Stop the current running configuration
-                ExecutionManager.getInstance(currentProject!!)
+                ExecutionManager.getInstance(openProjects)
                     .getContentManager().allDescriptors.forEach(Consumer<RunContentDescriptor> { descriptor: RunContentDescriptor ->
                         if (descriptor.processHandler!!.isProcessTerminating || descriptor.processHandler!!
                                 .isProcessTerminated
@@ -100,7 +100,7 @@ class ProjectStarterService : ProjectComponent {
                         descriptor.processHandler!!.destroyProcess()
                     })
                 logger.info("ProjectStarterService Plugin is running runner name.," + runner!!.runnerId)
-                val environment = executor?.let { ExecutionEnvironment(it, runner, configuration, currentProject!!) }
+                val environment = executor?.let { ExecutionEnvironment(it, runner, configuration, openProjects) }
                 if (environment != null) {
                     logger.info("ProjectStarterService Plugin is running execute.,")
                     runner.execute(environment).run { }
