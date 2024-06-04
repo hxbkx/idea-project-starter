@@ -5,15 +5,24 @@
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>Restart</name>
+    <name>spring boot 启动器</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor email="support@yourcompany.com" url="https://www.yourcompany.com">YourCompany</vendor>
+    <vendor email="2810414811@qq.com" url="https://www.yourcompany.com">龙龙科技</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
 
+    <!-- 插件的更改日志 -->
+    <change-notes><![CDATA[
+      - 初始版本
+           本插件用于从外部发起命令重启再idea中打开的spring boot项目，
+           仅限spring boot项目，并且配置了spring boot启动配置的项目，
+           具体命令是向组播地址230.0.0.0:43211发送命令“restart $项目名”，即可实现重启项目的功能，
+           原始需求是为了方便多项目开发的情况下，需要部署打包接口为jar包的情况下，需要重启获取swagger文档，是自动化部署和打包的工具之一
+           email: 2810414811@qq.com
+  ]]></change-notes>
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
