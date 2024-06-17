@@ -1,4 +1,4 @@
-# this is an idea plugin that able to restart the spring boot project in idea
+# this is an idea plugin that able to restart the spring boot project opened on idea
 ---
 author: huang xiongbin
 title: idea 项目重启器
