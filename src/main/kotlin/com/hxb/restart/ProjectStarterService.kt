@@ -15,6 +15,9 @@ import java.net.MulticastSocket
 import java.net.ServerSocket
 import java.util.function.Consumer
 
+/**
+ * this is a idea plugin that able to restart the spring boot project in idea
+ */
 class ProjectStarterService : ApplicationComponent {
     private var serverSocket: ServerSocket? = null
     val logger = com.intellij.openapi.diagnostic.Logger.getInstance(ProjectStarterService::class.java)
@@ -100,6 +103,7 @@ class ProjectStarterService : ApplicationComponent {
         val configurations = runManager.allSettings
 
         return configurations.filter { it ->
+            //TODO 可以自行扩展自己更感兴趣的项目类型进行重启
             logger.warn("it.configuration.javaClass.name:" + it.configuration.javaClass.name)
             it.configuration.javaClass.name == "com.intellij.spring.boot.run.SpringBootApplicationRunConfiguration"
 
