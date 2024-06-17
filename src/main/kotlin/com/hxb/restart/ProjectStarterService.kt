@@ -146,7 +146,7 @@ class ProjectStarterService : ApplicationComponent {
         if (configuration != null) {
             logger.info("ProjectStarterService Plugin is running cf name.," + configuration!!.name)
             val runConfiguration = /*configuration.configuration*/ configuration.configuration
-            val executor = ExecutorRegistry.getInstance().getExecutorById(ToolWindowId.RUN)
+            val executor = ExecutorRegistry.getInstance().getExecutorById(ToolWindowId.DEBUG)
             val runner = ProgramRunner.getRunner(ToolWindowId.DEBUG, runConfiguration)
             if (runner != null) {
                 ExecutionManager.getInstance(openProjects)
