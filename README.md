@@ -21,7 +21,24 @@ date: 2024-06-17
 
 1. idea plugin listening multi broadcast 230.0.0.0:43211
 2. client send "restart ${项目名}" package to 230.0.0.0:43211
-3. plugin restart the project which is opened on idea
+3. python 客户端示例：
+   
+```python
+import socket
+
+MCAST_GRP = '230.0.0.0'
+MCAST_PORT = 43211
+
+def restart_callback(app_name):
+   sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+   sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
+   custom_message = f"restart {app_name}"
+   sock.sendto(custom_message.encode('utf-8'), (MCAST_GRP, MCAST_PORT))
+   print(custom_message)
+   sock.close
+```
+ 
+4. plugin restart the project which is opened on idea
 
 #### 安装教程
 
