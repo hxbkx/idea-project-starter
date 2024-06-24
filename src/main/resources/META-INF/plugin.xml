@@ -43,11 +43,13 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-
+        <applicationService
+                serviceInterface="com.hxb.restart.StartService"
+                serviceImplementation="com.hxb.restart.ProjectStarterService"/>
     </extensions>
     <application-components>
-        <component>
-            <implementation-class>com.hxb.restart.ProjectStarterService</implementation-class>
-        </component>
     </application-components>
+    <applicationListeners>
+        <listener class="com.hxb.restart.PluginAppLifecycleListener" topic="com.intellij.ide.AppLifecycleListener"/>
+    </applicationListeners>
 </idea-plugin>

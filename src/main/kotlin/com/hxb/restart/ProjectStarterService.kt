@@ -5,7 +5,8 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
 import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.ApplicationComponent
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.wm.ToolWindowId
@@ -18,11 +19,16 @@ import java.util.function.Consumer
 /**
  * this is a idea plugin that able to restart the spring boot project in idea
  */
-class ProjectStarterService : ApplicationComponent {
+@Service
+class ProjectStarterService : StartService {
     private var serverSocket: ServerSocket? = null
     val logger = com.intellij.openapi.diagnostic.Logger.getInstance(ProjectStarterService::class.java)
 
-    override fun initComponent() {
+    companion object {
+        fun getInstance(): ProjectStarterService = service()
+    }
+
+    override fun start() {
         logger.info("project starter service Plugin is running.")
 
         Thread {
@@ -56,7 +62,7 @@ class ProjectStarterService : ApplicationComponent {
         }.start()
     }
 
-    override fun disposeComponent() {
+    override fun stop() {
         if (serverSocket != null) {
             try {
                 serverSocket!!.close()
