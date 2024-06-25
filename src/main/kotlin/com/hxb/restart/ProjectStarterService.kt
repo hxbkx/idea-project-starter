@@ -4,6 +4,7 @@ import com.intellij.execution.*
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
 import com.intellij.execution.ui.RunContentDescriptor
+import com.intellij.execution.ui.RunContentManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
@@ -135,8 +136,7 @@ class ProjectStarterService : StartService {
             val executor = ExecutorRegistry.getInstance().getExecutorById(ToolWindowId.DEBUG)
             val runner = ProgramRunner.getRunner(ToolWindowId.DEBUG, runConfiguration)
             if (runner != null) {
-                ExecutionManager.getInstance(openProjects)
-                    .getContentManager().allDescriptors.forEach(Consumer<RunContentDescriptor> { descriptor: RunContentDescriptor ->
+                RunContentManager.getInstance(openProjects).allDescriptors.forEach(Consumer<RunContentDescriptor> { descriptor: RunContentDescriptor ->
                         if (descriptor.processHandler!!.isProcessTerminating || descriptor.processHandler!!
                                 .isProcessTerminated
                         ) {
