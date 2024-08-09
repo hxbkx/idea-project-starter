@@ -11,10 +11,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.wm.ToolWindowId
-import java.net.DatagramPacket
-import java.net.InetAddress
-import java.net.MulticastSocket
-import java.net.ServerSocket
+import java.net.*
 import java.util.function.Consumer
 
 /**
@@ -35,17 +32,15 @@ class ProjectStarterService : StartService {
         Thread {
 
             logger.info("project starter service Plugin is running 1.")
-            val multicastGroupAddress = "230.0.0.0"
-            val multicastPort = 43211
-            val group = InetAddress.getByName(multicastGroupAddress)
-            val multicastSocket = MulticastSocket(multicastPort)
-            multicastSocket.joinGroup(group)
+            val udpPort = 43211
+            val localAddress = InetAddress.getByName("127.0.0.1")
+            val udpSocket = DatagramSocket(udpPort,localAddress)
             while (true) {
                 try {
                     logger.info("project starter service Plugin is running 2.")
                     val buffer = ByteArray(1000)
                     val packet = DatagramPacket(buffer, buffer.size)
-                    multicastSocket.receive(packet)
+                    udpSocket.receive(packet)
                     logger.info("project starter service Plugin is running 3.")
                     val message = String(packet.data, 0, packet.length).trim()
                     println("Received message: $message")
@@ -53,7 +48,6 @@ class ProjectStarterService : StartService {
                     ApplicationManager.getApplication().invokeLater {
                         restartSpringBootProject(message)
                     }
-
 
                 } catch (e: Exception) {
                     logger.error("project starter service Plugin is error 4.", e)
