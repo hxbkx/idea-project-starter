@@ -1,7 +1,9 @@
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "1.9.0"
-    id("org.jetbrains.intellij") version "1.15.0"
+    id("org.jetbrains.intellij") version "1.17.4"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    `maven-publish`
 }
 
 group = "com.hxb"
@@ -9,17 +11,27 @@ version = "1.0"
 
 repositories {
     mavenCentral()
+    maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
 }
 
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-    version.set("2022.2.5")
+    version.set("2023.2.5")
     type.set("IC") // Target IDE Platform
     pluginName.set("starter")
-    plugins.set(listOf(/* Plugin Dependencies */))
+    plugins.set(listOf("maven"))
+
 }
 
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenPlugin") {
+            from(components["java"])
+        }
+    }
+}
 
 tasks {
     // Set the JVM compatibility versions
@@ -30,9 +42,14 @@ tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.jvmTarget = "17"
     }
+    withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+        archiveFileName.set("restart.jar")
+        mergeServiceFiles()
+        configurations = listOf(project.configurations.runtimeClasspath.get())
+    }
+
 
     patchPluginXml {
-        sinceBuild.set("222")
         untilBuild.set("232.*")
     }
 
